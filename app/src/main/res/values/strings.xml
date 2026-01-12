@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Force 120Hz</string>
+    <string name="accessibility_description">Keeps your screen at 120Hz by running a minimal invisible animation.</string>
+</resources>

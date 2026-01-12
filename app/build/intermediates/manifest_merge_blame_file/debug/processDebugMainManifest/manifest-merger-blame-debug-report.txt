@@ -1,0 +1,191 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.forcehz.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="35" />
+10
+11    <!-- Autostart on boot -->
+12    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+12-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:6:5-81
+12-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:6:22-78
+13
+14    <!-- Notifications (Android 13+) -->
+15    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+15-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:9:5-77
+15-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:9:22-74
+16
+17    <permission
+17-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:22:5-24:47
+18        android:name="com.forcehz.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.forcehz.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:11:5-53:19
+24        android:allowBackup="true"
+24-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:12:9-35
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.15.0] C:\Users\user\.gradle\caches\8.13\transforms\a7029e1c9fbb5266c89521be3992615c\transformed\core-1.15.0\AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:icon="@mipmap/ic_launcher"
+28-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:13:9-43
+29        android:label="@string/app_name"
+29-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:14:9-41
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:15:9-54
+31        android:supportsRtl="true"
+31-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:16:9-35
+32        android:theme="@style/Theme.ForceHz" >
+32-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:17:9-45
+33        <activity
+33-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:20:9-28:20
+34            android:name="com.forcehz.app.MainActivity"
+34-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:21:13-41
+35            android:exported="true"
+35-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:22:13-36
+36            android:theme="@style/Theme.ForceHz" >
+36-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:23:13-49
+37            <intent-filter>
+37-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:24:13-27:29
+38                <action android:name="android.intent.action.MAIN" />
+38-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:25:17-69
+38-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:25:25-66
+39
+40                <category android:name="android.intent.category.LAUNCHER" />
+40-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:26:17-77
+40-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:26:27-74
+41            </intent-filter>
+42        </activity>
+43
+44        <!-- Accessibility Service - без уведомления об overlay! -->
+45        <service
+45-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:31:9-41:19
+46            android:name="com.forcehz.app.ForceHzAccessibilityService"
+46-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:32:13-56
+47            android:exported="true"
+47-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:33:13-36
+48            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+48-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:34:13-79
+49            <intent-filter>
+49-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:35:13-37:29
+50                <action android:name="android.accessibilityservice.AccessibilityService" />
+50-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:36:17-92
+50-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:36:25-89
+51            </intent-filter>
+52
+53            <meta-data
+53-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:38:13-40:72
+54                android:name="android.accessibilityservice"
+54-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:39:17-60
+55                android:resource="@xml/accessibility_service_config" />
+55-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:40:17-69
+56        </service>
+57
+58        <!-- Boot receiver -->
+59        <receiver
+59-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:44:9-51:20
+60            android:name="com.forcehz.app.BootReceiver"
+60-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:45:13-41
+61            android:enabled="true"
+61-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:46:13-35
+62            android:exported="true" >
+62-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:47:13-36
+63            <intent-filter>
+63-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:48:13-50:29
+64                <action android:name="android.intent.action.BOOT_COMPLETED" />
+64-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:49:17-79
+64-->C:\Users\user\Projects\pets\force_hz\app\src\main\AndroidManifest.xml:49:25-76
+65            </intent-filter>
+66        </receiver>
+67
+68        <activity
+68-->[androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\1733b8c17e3b83dfafa57fb9d18ae687\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:23:9-25:39
+69            android:name="androidx.activity.ComponentActivity"
+69-->[androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\1733b8c17e3b83dfafa57fb9d18ae687\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:24:13-63
+70            android:exported="true" />
+70-->[androidx.compose.ui:ui-test-manifest:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\1733b8c17e3b83dfafa57fb9d18ae687\transformed\ui-test-manifest-1.7.6\AndroidManifest.xml:25:13-36
+71        <activity
+71-->[androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\fabb00420e732b7cdfd270a6ee5345a8\transformed\ui-tooling-release\AndroidManifest.xml:23:9-25:39
+72            android:name="androidx.compose.ui.tooling.PreviewActivity"
+72-->[androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\fabb00420e732b7cdfd270a6ee5345a8\transformed\ui-tooling-release\AndroidManifest.xml:24:13-71
+73            android:exported="true" />
+73-->[androidx.compose.ui:ui-tooling-android:1.7.6] C:\Users\user\.gradle\caches\8.13\transforms\fabb00420e732b7cdfd270a6ee5345a8\transformed\ui-tooling-release\AndroidManifest.xml:25:13-36
+74
+75        <provider
+75-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+76            android:name="androidx.startup.InitializationProvider"
+76-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+77            android:authorities="com.forcehz.app.androidx-startup"
+77-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+78            android:exported="false" >
+78-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+79            <meta-data
+79-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+80                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+80-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+81                android:value="androidx.startup" />
+81-->[androidx.emoji2:emoji2:1.3.0] C:\Users\user\.gradle\caches\8.13\transforms\0ede774e33b602523149e299eab4b84c\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+82            <meta-data
+82-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\user\.gradle\caches\8.13\transforms\9c71e82fd1d5d547c46a8b8cfba56ede\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:29:13-31:52
+83                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+83-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\user\.gradle\caches\8.13\transforms\9c71e82fd1d5d547c46a8b8cfba56ede\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:30:17-78
+84                android:value="androidx.startup" />
+84-->[androidx.lifecycle:lifecycle-process:2.8.7] C:\Users\user\.gradle\caches\8.13\transforms\9c71e82fd1d5d547c46a8b8cfba56ede\transformed\lifecycle-process-2.8.7\AndroidManifest.xml:31:17-49
+85            <meta-data
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+86                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+87                android:value="androidx.startup" />
+87-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+88        </provider>
+89
+90        <receiver
+90-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+91            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+92            android:directBootAware="false"
+92-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+93            android:enabled="true"
+93-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+94            android:exported="true"
+94-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+95            android:permission="android.permission.DUMP" >
+95-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+96            <intent-filter>
+96-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+97                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+97-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+97-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+98            </intent-filter>
+99            <intent-filter>
+99-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+100                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+100-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+100-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+101            </intent-filter>
+102            <intent-filter>
+102-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+103                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+104            </intent-filter>
+105            <intent-filter>
+105-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+106                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\user\.gradle\caches\8.13\transforms\5e90ec3de10b34ab39c6af4f47e66ba8\transformed\profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+107            </intent-filter>
+108        </receiver>
+109    </application>
+110
+111</manifest>

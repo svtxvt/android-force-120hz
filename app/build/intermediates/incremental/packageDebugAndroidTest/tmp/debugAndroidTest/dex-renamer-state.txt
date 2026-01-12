@@ -1,0 +1,4 @@
+#Wed Jan 07 15:26:53 EET 2026
+base.0=C\:\\Users\\user\\Projects\\pets\\force_hz\\app\\build\\intermediates\\dex\\debugAndroidTest\\mergeProjectDexDebugAndroidTest\\0\\classes.dex
+path.0=0/classes.dex
+renamed.0=classes.dex
