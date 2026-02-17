@@ -4,6 +4,12 @@
 
 Force 120Hz on Android devices with aggressive LTPO downscaling (when refresh drops to 60Hz on static content).
 
+## Demo
+
+<p align="center">
+  <img src="demo.gif" alt="Force 120Hz demo" width="360" />
+</p>
+
 ## Try ADB First (Recommended)
 
 If these commands work on your device, you probably do not need this app:
