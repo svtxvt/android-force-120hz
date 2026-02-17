@@ -1,69 +1,48 @@
-# android-force-120hz
+# Android Force 120Hz
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-A workaround app to force 120Hz refresh rate on Android phones with aggressive LTPO displays.
+Force 120Hz on Android devices with aggressive LTPO downscaling (when refresh drops to 60Hz on static content).
 
----
+## Try ADB First (Recommended)
 
-## ⚠️ Try This First!
-
-Before installing this app, **try the ADB commands** — they're battery-friendly and work on most devices:
+If these commands work on your device, you probably do not need this app:
 
 ```bash
-# Set minimum refresh rate to max (forces 120Hz)
 adb shell settings put system min_refresh_rate 120
-
-# Alternative method
 adb shell settings put system peak_refresh_rate 120
 adb shell settings put secure min_refresh_rate 120.0
 ```
 
-If ADB commands work for you — great! You don't need this app.
+## Download
 
-**This app is a last resort** for devices where:
-- ADB commands don't work (looking at you, Vivo/OPPO/OnePlus with OriginOS/ColorOS)
-- The display still drops to 60Hz on static content
-- You've tried everything else and still get stutters
+Get the latest APK from [Releases](../../releases).
 
----
+## Quick Start
+
+1. Install APK (allow unknown sources if prompted).
+2. Open app.
+3. Tap `Open Accessibility Settings`.
+4. Enable `Force 120Hz` service.
+5. Return to app and enable animation.
+
+## Stable After Reboot (Important)
+
+For reliable always-on behavior after reboot, set all of these:
+
+1. Accessibility service: enabled.
+2. Battery mode: unrestricted / no optimization.
+3. OEM auto-start: enabled for this app.
+
+The app includes a `Startup Stability` section with quick links to these settings.
 
 ## How It Works
 
-The app creates a tiny invisible overlay (1 pixel) that updates every frame. This tricks the LTPO controller into thinking content is always changing, so it keeps the display at max refresh rate.
+The service keeps a tiny 1px accessibility overlay animating every frame. This keeps display content "active", so LTPO panels are less likely to drop refresh rate.
 
-**Battery impact**: Yes, there will be some. Running the display at 120Hz constantly uses more power than adaptive refresh. Expect ~10-15% less screen-on time. That's just physics — the display is working harder.
+Battery impact is expected: forcing high refresh rate uses more power than adaptive mode.
 
----
-
-## Download
-
-Grab the latest APK from [Releases](../../releases).
-
-## Installation
-
-1. Download APK from Releases
-2. Install it (allow unknown sources if prompted)
-3. Open the app
-4. Tap "Open Accessibility Settings"
-5. Find "Force 120Hz" → enable it
-6. Return to app → toggle ON
-
-The service will auto-start after reboot.
-
-### ⚠️ Google Play Protect Blocking Installation?
-
-Play Protect may block the app because it uses Accessibility Service. To install:
-
-1. Open **Play Store** → tap your avatar → **Play Protect**
-2. Tap **⚙️ Settings** (gear icon)
-3. **Disable** "Scan apps with Play Protect"
-4. Install the APK
-5. **Re-enable** Play Protect after installation
-
----
-
-## Building from Source
+## Build From Source
 
 ```bash
 # Windows
@@ -73,51 +52,48 @@ Play Protect may block the app because it uses Accessibility Service. To install
 ./gradlew assembleRelease
 ```
 
-APK: `app/build/outputs/apk/release/app-release.apk`
+Release APK output:
 
----
+`app/build/outputs/apk/release/app-release.apk`
 
-## Requirements
+## Release Signing
 
-- Android 8.0+ (API 26)
-- High refresh rate display (120Hz/90Hz)
-
----
-
-## Contributing
-
-PRs and improvements are welcome! If you found a better way to achieve this, or want to optimize the code further — feel free to open an issue or submit a pull request.
-
----
-
-## License
-
-[CC BY-NC-SA 4.0](LICENSE) — Free to use and modify, but not for commercial purposes.
-
----
-
-## Installation Troubleshooting (Security Block)
-
-Some OEM ROMs can block sideloaded APKs that use Accessibility Service.
-
-If installation is blocked:
-
-1. Use a release build, not a debug build.
-2. Sign release APK with your own keystore.
-3. If you previously installed another build, uninstall it first (signature mismatch blocks updates).
-4. Allow "Install unknown apps" for the app that opens APK (browser/file manager).
-5. Temporarily disable Play Protect scan during install, then enable it back.
-6. Enable OEM "Auto-start" for the app and set battery mode to "Unrestricted" for stable restart after reboot.
-
-You can verify APK signature with:
-
-```bash
-apksigner verify --verbose app-release.apk
-```
-
-Release signing env vars supported by this project:
+Release build requires these environment variables:
 
 - `KEYSTORE_PATH`
 - `KEYSTORE_PASSWORD`
 - `KEY_ALIAS`
 - `KEY_PASSWORD`
+
+Example (PowerShell):
+
+```powershell
+$env:KEYSTORE_PATH="C:\path\forcehz-release.jks"
+$env:KEYSTORE_PASSWORD="your_store_password"
+$env:KEY_ALIAS="forcehz"
+$env:KEY_PASSWORD="your_key_password"
+```
+
+Verify APK signature:
+
+```bash
+apksigner verify --verbose --print-certs app-release.apk
+```
+
+## Installation Issues
+
+If installation is blocked by device security / Play Protect:
+
+1. Install a release-signed APK (not debug).
+2. If app was installed with a different signature before, uninstall old version first.
+3. Allow install permission for your browser/file manager.
+4. Temporarily disable Play Protect scan, install APK, then enable it back.
+
+## Requirements
+
+- Android 8.0+ (API 26)
+- 90Hz/120Hz display
+
+## License
+
+[CC BY-NC-SA 4.0](LICENSE)

@@ -10,6 +10,11 @@ android {
     namespace = "com.forcehz.app"
     compileSdk = 35
 
+    val releaseTasksRequested = gradle.startParameter.taskNames.any { taskName ->
+        val lowered = taskName.lowercase()
+        lowered.contains("release") || lowered.contains("bundle") || lowered.contains("publish")
+    }
+
     defaultConfig {
         applicationId = "com.forcehz.app"
         minSdk = 26
@@ -25,20 +30,28 @@ android {
             val keyAliasName = System.getenv("KEY_ALIAS")
             val keyPass = System.getenv("KEY_PASSWORD")
 
-            if (keystorePath.isNullOrBlank() ||
+            val missingSigningEnv = keystorePath.isNullOrBlank() ||
                 keystorePass.isNullOrBlank() ||
                 keyAliasName.isNullOrBlank() ||
                 keyPass.isNullOrBlank()
-            ) {
-                throw GradleException(
-                    "Release signing requires KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD."
-                )
+
+            if (missingSigningEnv) {
+                if (releaseTasksRequested) {
+                    throw GradleException(
+                        "Release signing requires KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD."
+                    )
+                }
+
+                storeFile = file("${System.getProperty("user.home")}/.android/debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            } else {
+                storeFile = file(keystorePath)
+                storePassword = keystorePass
+                keyAlias = keyAliasName
+                keyPassword = keyPass
             }
-            
-            storeFile = file(keystorePath)
-            storePassword = keystorePass
-            keyAlias = keyAliasName
-            keyPassword = keyPass
         }
     }
 
@@ -69,6 +82,10 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -87,4 +104,9 @@ dependencies {
     // Debug tools
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Unit tests
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }
