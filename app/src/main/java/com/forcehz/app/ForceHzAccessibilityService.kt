@@ -21,8 +21,8 @@ import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.TextView
-import kotlin.math.abs
-import kotlin.math.sin
+import androidx.core.content.edit
+import java.lang.ref.WeakReference
 
 /**
  * Service to force 120Hz refresh rate using invisible overlay animations.
@@ -34,8 +34,15 @@ import kotlin.math.sin
 class ForceHzAccessibilityService : AccessibilityService() {
 
     companion object {
-        var instance: ForceHzAccessibilityService? = null
+        private var instanceRef: WeakReference<ForceHzAccessibilityService>? = null
+        val instance: ForceHzAccessibilityService?
+            get() = instanceRef?.get()
         var isRunning = false
+
+        const val PREFS_NAME = "force_hz_prefs"
+        const val PREF_ANIMATION_ENABLED = "animation_enabled"
+        const val PREF_SHOW_FPS = "show_fps"
+        const val PREF_RESTORE_ON_CONNECT = "restore_on_connect"
         
         const val ACTION_FPS_UPDATE = "com.forcehz.app.FPS_UPDATE"
         const val EXTRA_FPS = "fps"
@@ -56,7 +63,7 @@ class ForceHzAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        instance = this
+        instanceRef = WeakReference(this)
         isRunning = true
         
         mainHandler = Handler(Looper.getMainLooper())
@@ -67,19 +74,23 @@ class ForceHzAccessibilityService : AccessibilityService() {
         
         // Optimize service info to not monitor events
         serviceInfo = AccessibilityServiceInfo().apply {
-            eventTypes = 0
+            eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-            flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
             notificationTimeout = 100
         }
         
         val pm = getSystemService(POWER_SERVICE) as PowerManager
         isScreenOn = pm.isInteractive
         
-        val prefs = getSharedPreferences("force_hz_prefs", MODE_PRIVATE)
-        showFps = prefs.getBoolean("show_fps", false)
-        
-        if (prefs.getBoolean("animation_enabled", false)) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        showFps = prefs.getBoolean(PREF_SHOW_FPS, false)
+
+        val restoreOnConnect = prefs.getBoolean(PREF_RESTORE_ON_CONNECT, false)
+        if (restoreOnConnect) {
+            prefs.edit { putBoolean(PREF_RESTORE_ON_CONNECT, false) }
+        }
+
+        if (prefs.getBoolean(PREF_ANIMATION_ENABLED, false) || restoreOnConnect) {
             startForceRefresh()
         }
     }
@@ -112,7 +123,9 @@ class ForceHzAccessibilityService : AccessibilityService() {
         unregisterScreenReceiver()
         stopForceRefresh()
         removeFpsOverlay()
-        instance = null
+        mainHandler?.removeCallbacksAndMessages(null)
+        mainHandler = null
+        instanceRef = null
         isRunning = false
     }
     
@@ -143,6 +156,7 @@ class ForceHzAccessibilityService : AccessibilityService() {
     
     private fun unregisterScreenReceiver() {
         screenReceiver?.let { try { unregisterReceiver(it) } catch (e: Exception) { } }
+        screenReceiver = null
     }
     
     fun getCurrentMode() = 0 // Single mode now
@@ -153,8 +167,10 @@ class ForceHzAccessibilityService : AccessibilityService() {
         if (animationActive) return
         animationActive = true
         
-        getSharedPreferences("force_hz_prefs", MODE_PRIVATE)
-            .edit().putBoolean("animation_enabled", true).apply()
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit {
+            putBoolean(PREF_ANIMATION_ENABLED, true)
+            putBoolean(PREF_RESTORE_ON_CONNECT, false)
+        }
         
         createOverlay()
         if (showFps && isScreenOn) createFpsOverlay()
@@ -162,16 +178,19 @@ class ForceHzAccessibilityService : AccessibilityService() {
     
     fun stopForceRefresh() {
         animationActive = false
-        getSharedPreferences("force_hz_prefs", MODE_PRIVATE)
-            .edit().putBoolean("animation_enabled", false).apply()
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit {
+            putBoolean(PREF_ANIMATION_ENABLED, false)
+            putBoolean(PREF_RESTORE_ON_CONNECT, false)
+        }
         removeOverlay()
         removeFpsOverlay()
     }
     
     fun toggleFpsOverlay() {
         showFps = !showFps
-        getSharedPreferences("force_hz_prefs", MODE_PRIVATE)
-            .edit().putBoolean("show_fps", showFps).apply()
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit {
+            putBoolean(PREF_SHOW_FPS, showFps)
+        }
         
         if (showFps && animationActive && isScreenOn) createFpsOverlay()
         else removeFpsOverlay()
@@ -211,7 +230,7 @@ class ForceHzAccessibilityService : AccessibilityService() {
         if (fpsView != null || !isScreenOn) return
         
         fpsView = TextView(this).apply {
-            text = "-- FPS"
+            text = getString(R.string.fps_placeholder)
             setTextColor(Color.GREEN)
             textSize = 11f
             setBackgroundColor(Color.argb(180, 0, 0, 0))
@@ -243,7 +262,7 @@ class ForceHzAccessibilityService : AccessibilityService() {
         if (!isScreenOn) return
         
         mainHandler?.post {
-            fpsView?.text = "%.0f FPS".format(fps)
+            fpsView?.text = getString(R.string.fps_value, fps)
             fpsView?.setTextColor(when {
                 fps >= 115 -> Color.GREEN
                 fps >= 85 -> Color.YELLOW
@@ -277,7 +296,6 @@ class ForceHzAccessibilityService : AccessibilityService() {
         
         private var isRunning = false
         private var frameIndex = 0
-        private var lastFrameTime = 0L
         
         // FPS logic
         private var frameCount = 0
@@ -291,7 +309,6 @@ class ForceHzAccessibilityService : AccessibilityService() {
         fun start() {
             if (isRunning) return
             isRunning = true
-            lastFrameTime = System.nanoTime()
             lastFpsTime = System.nanoTime()
             frameCount = 0
             Choreographer.getInstance().postFrameCallback(this)

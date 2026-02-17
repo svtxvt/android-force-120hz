@@ -5,17 +5,20 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.BatteryManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,19 +41,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.io.File
 
 class MainActivity : ComponentActivity() {
 
     private var fpsReceiver: BroadcastReceiver? = null
-    private val currentFps = mutableStateOf(0f)
+    private val currentFps = mutableFloatStateOf(0f)
     private val isServiceEnabled = mutableStateOf(false)
     private val isAnimationActive = mutableStateOf(false)
-    private val currentMode = mutableStateOf(0)
-    private val displayRefreshRate = mutableStateOf(120)
+    private val currentMode = mutableIntStateOf(0)
+    private val displayRefreshRate = mutableIntStateOf(120)
     
-    private val batteryTemp = mutableStateOf(0f)
-    private val batteryLevel = mutableStateOf(0)
+    private val batteryTemp = mutableFloatStateOf(0f)
+    private val batteryLevel = mutableIntStateOf(0)
+    private val isBatteryOptimizationDisabled = mutableStateOf(false)
     private var monitorHandler: Handler? = null
     private var monitorRunnable: Runnable? = null
 
@@ -61,19 +64,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         refreshState()
-        startMonitoring()
 
         setContent {
             ForceHzTheme {
                 Force120HzApp(
-                    currentFps = currentFps.value,
+                    currentFps = currentFps.floatValue,
                     isServiceEnabled = isServiceEnabled.value,
                     isAnimationActive = isAnimationActive.value,
-                    currentMode = currentMode.value,
-                    displayRefreshRate = displayRefreshRate.value,
-                    batteryTemp = batteryTemp.value,
-                    batteryLevel = batteryLevel.value,
+                    currentMode = currentMode.intValue,
+                    displayRefreshRate = displayRefreshRate.intValue,
+                    batteryTemp = batteryTemp.floatValue,
+                    batteryLevel = batteryLevel.intValue,
+                    isBatteryOptimizationDisabled = isBatteryOptimizationDisabled.value,
                     onOpenAccessibilitySettings = { openAccessibilitySettings() },
+                    onOpenBatteryOptimizationSettings = { openBatteryOptimizationSettings() },
+                    onOpenAutoStartSettings = { openAutoStartSettings() },
+                    onOpenAppSettings = { openAppDetailsSettings() },
                     onToggleAnimation = { toggleAnimation() },
                     onToggleFpsOverlay = { toggleFpsOverlay() },
                     onChangeMode = { mode -> changeMode(mode) }
@@ -81,10 +87,29 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        refreshState()
+        startMonitoring()
+        registerFpsReceiver()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshState()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unregisterFpsReceiver()
+        stopMonitoring()
+    }
     
     // ...
     
     private fun startMonitoring() {
+        if (monitorHandler != null) return
         monitorHandler = Handler(Looper.getMainLooper())
         monitorRunnable = object : Runnable {
             override fun run() {
@@ -97,13 +122,15 @@ class MainActivity : ComponentActivity() {
     
     private fun stopMonitoring() {
         monitorRunnable?.let { monitorHandler?.removeCallbacks(it) }
+        monitorRunnable = null
+        monitorHandler = null
     }
     
     private fun updateBatteryInfo() {
         val batteryStatus = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         batteryStatus?.let {
-            batteryTemp.value = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
-            batteryLevel.value = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+            batteryTemp.floatValue = it.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10f
+            batteryLevel.intValue = it.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
         }
     }
     
@@ -112,9 +139,10 @@ class MainActivity : ComponentActivity() {
     private fun refreshState() {
         isServiceEnabled.value = isAccessibilityServiceEnabled()
         isAnimationActive.value = ForceHzAccessibilityService.instance?.isAnimationEnabled() ?: false
-        currentMode.value = ForceHzAccessibilityService.instance?.getCurrentMode() 
+        currentMode.intValue = ForceHzAccessibilityService.instance?.getCurrentMode() 
             ?: getSharedPreferences("force_hz_prefs", MODE_PRIVATE).getInt("animation_mode", 0)
-        displayRefreshRate.value = ForceHzAccessibilityService.instance?.getDisplayRefreshRate() ?: 120
+        displayRefreshRate.intValue = ForceHzAccessibilityService.instance?.getDisplayRefreshRate() ?: 120
+        isBatteryOptimizationDisabled.value = checkBatteryOptimizationDisabled()
     }
     
     private fun isAccessibilityServiceEnabled(): Boolean {
@@ -124,28 +152,93 @@ class MainActivity : ComponentActivity() {
     }
     
     private fun registerFpsReceiver() {
-        fpsReceiver = object : BroadcastReceiver() {
+        if (fpsReceiver != null) return
+
+        val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == ForceHzAccessibilityService.ACTION_FPS_UPDATE) {
-                    currentFps.value = intent.getFloatExtra(ForceHzAccessibilityService.EXTRA_FPS, 0f)
+                    currentFps.floatValue = intent.getFloatExtra(ForceHzAccessibilityService.EXTRA_FPS, 0f)
                 }
             }
         }
+        fpsReceiver = receiver
         val filter = IntentFilter(ForceHzAccessibilityService.ACTION_FPS_UPDATE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(fpsReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(fpsReceiver, filter)
-        }
+        ContextCompat.registerReceiver(this, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
     
     private fun unregisterFpsReceiver() {
         fpsReceiver?.let { try { unregisterReceiver(it) } catch (e: Exception) { } }
+        fpsReceiver = null
+        currentFps.floatValue = 0f
     }
 
     private fun openAccessibilitySettings() {
         accessibilitySettingsLauncher.launch(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         Toast.makeText(this, "Find 'Force 120Hz' and enable it", Toast.LENGTH_LONG).show()
+    }
+
+    private fun checkBatteryOptimizationDisabled(): Boolean {
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        return powerManager.isIgnoringBatteryOptimizations(packageName)
+    }
+
+    private fun openBatteryOptimizationSettings() {
+        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            startActivity(intent)
+        } catch (_: Exception) {
+            openAppDetailsSettings()
+        }
+    }
+
+    private fun openAutoStartSettings() {
+        val candidates = listOf(
+            Intent().setClassName(
+                "com.miui.securitycenter",
+                "com.miui.permcenter.autostart.AutoStartManagementActivity"
+            ),
+            Intent().setClassName(
+                "com.coloros.safecenter",
+                "com.coloros.safecenter.permission.startup.StartupAppListActivity"
+            ),
+            Intent().setClassName(
+                "com.oplus.safecenter",
+                "com.oplus.safecenter.startupapp.StartupAppListActivity"
+            ),
+            Intent().setClassName(
+                "com.vivo.permissionmanager",
+                "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+            ),
+            Intent().setClassName(
+                "com.huawei.systemmanager",
+                "com.huawei.systemmanager.optimize.process.ProtectActivity"
+            ),
+            Intent().setClassName(
+                "com.samsung.android.lool",
+                "com.samsung.android.sm.ui.battery.BatteryActivity"
+            )
+        )
+
+        val launched = candidates.firstOrNull { intent ->
+            intent.resolveActivity(packageManager) != null
+        }?.let { intent ->
+            startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            true
+        } ?: false
+
+        if (!launched) {
+            openAppDetailsSettings()
+        }
+    }
+
+    private fun openAppDetailsSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        startActivity(intent)
     }
     
     private fun toggleAnimation() {
@@ -164,10 +257,11 @@ class MainActivity : ComponentActivity() {
     }
     
     private fun changeMode(mode: Int) {
-        currentMode.value = mode
+        currentMode.intValue = mode
         ForceHzAccessibilityService.instance?.changeMode(mode)
-            ?: getSharedPreferences("force_hz_prefs", MODE_PRIVATE)
-                .edit().putInt("animation_mode", mode).apply()
+            ?: getSharedPreferences("force_hz_prefs", MODE_PRIVATE).edit {
+                putInt("animation_mode", mode)
+            }
     }
 }
 
@@ -197,7 +291,11 @@ fun Force120HzApp(
     displayRefreshRate: Int,
     batteryTemp: Float,
     batteryLevel: Int,
+    isBatteryOptimizationDisabled: Boolean,
     onOpenAccessibilitySettings: () -> Unit,
+    onOpenBatteryOptimizationSettings: () -> Unit,
+    onOpenAutoStartSettings: () -> Unit,
+    onOpenAppSettings: () -> Unit,
     onToggleAnimation: () -> Unit,
     onToggleFpsOverlay: () -> Unit,
     onChangeMode: (Int) -> Unit
@@ -302,9 +400,118 @@ fun Force120HzApp(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            StabilityCard(
+                isServiceEnabled = isServiceEnabled,
+                isBatteryOptimizationDisabled = isBatteryOptimizationDisabled,
+                onOpenAccessibilitySettings = onOpenAccessibilitySettings,
+                onOpenBatteryOptimizationSettings = onOpenBatteryOptimizationSettings,
+                onOpenAutoStartSettings = onOpenAutoStartSettings,
+                onOpenAppSettings = onOpenAppSettings
+            )
             
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+}
+
+@Composable
+fun StabilityCard(
+    isServiceEnabled: Boolean,
+    isBatteryOptimizationDisabled: Boolean,
+    onOpenAccessibilitySettings: () -> Unit,
+    onOpenBatteryOptimizationSettings: () -> Unit,
+    onOpenAutoStartSettings: () -> Unit,
+    onOpenAppSettings: () -> Unit
+) {
+    val okColor = Color(0xFF00E676)
+    val warnColor = Color(0xFFFFB74D)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Startup Stability", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                "For always-on 120Hz after reboot, keep Accessibility enabled, battery unrestricted, and OEM auto-start allowed.",
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            StabilityStatusRow(
+                label = "Accessibility Service",
+                value = if (isServiceEnabled) "Enabled" else "Disabled",
+                valueColor = if (isServiceEnabled) okColor else warnColor
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            StabilityStatusRow(
+                label = "Battery Mode",
+                value = if (isBatteryOptimizationDisabled) "Unrestricted" else "Optimized",
+                valueColor = if (isBatteryOptimizationDisabled) okColor else warnColor
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Auto-start status cannot be read on most OEM ROMs. Open OEM Auto-start and allow this app manually.",
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            FilledTonalButton(
+                onClick = onOpenAutoStartSettings,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Open OEM Auto-start")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = onOpenBatteryOptimizationSettings,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Open Battery Settings")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = onOpenAccessibilitySettings,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Open Accessibility Settings")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedButton(
+                onClick = onOpenAppSettings,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Open App Details")
+            }
+        }
+    }
+}
+
+@Composable
+fun StabilityStatusRow(label: String, value: String, valueColor: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, fontSize = 13.sp)
+        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = valueColor)
     }
 }
 

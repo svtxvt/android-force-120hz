@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+import org.gradle.api.GradleException
+
 android {
     namespace = "com.forcehz.app"
     compileSdk = 35
@@ -18,12 +20,20 @@ android {
 
     signingConfigs {
         create("release") {
-            // For local builds: use debug keystore
-            // For CI: set these environment variables
-            val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${System.getProperty("user.home")}/.android/debug.keystore"
-            val keystorePass = System.getenv("KEYSTORE_PASSWORD") ?: "android"
-            val keyAliasName = System.getenv("KEY_ALIAS") ?: "androiddebugkey"
-            val keyPass = System.getenv("KEY_PASSWORD") ?: "android"
+            val keystorePath = System.getenv("KEYSTORE_PATH")
+            val keystorePass = System.getenv("KEYSTORE_PASSWORD")
+            val keyAliasName = System.getenv("KEY_ALIAS")
+            val keyPass = System.getenv("KEY_PASSWORD")
+
+            if (keystorePath.isNullOrBlank() ||
+                keystorePass.isNullOrBlank() ||
+                keyAliasName.isNullOrBlank() ||
+                keyPass.isNullOrBlank()
+            ) {
+                throw GradleException(
+                    "Release signing requires KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD."
+                )
+            }
             
             storeFile = file(keystorePath)
             storePassword = keystorePass

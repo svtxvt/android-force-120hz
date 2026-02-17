@@ -51,6 +51,16 @@ Grab the latest APK from [Releases](../../releases).
 
 The service will auto-start after reboot.
 
+### ⚠️ Google Play Protect Blocking Installation?
+
+Play Protect may block the app because it uses Accessibility Service. To install:
+
+1. Open **Play Store** → tap your avatar → **Play Protect**
+2. Tap **⚙️ Settings** (gear icon)
+3. **Disable** "Scan apps with Play Protect"
+4. Install the APK
+5. **Re-enable** Play Protect after installation
+
 ---
 
 ## Building from Source
@@ -83,3 +93,31 @@ PRs and improvements are welcome! If you found a better way to achieve this, or 
 ## License
 
 [CC BY-NC-SA 4.0](LICENSE) — Free to use and modify, but not for commercial purposes.
+
+---
+
+## Installation Troubleshooting (Security Block)
+
+Some OEM ROMs can block sideloaded APKs that use Accessibility Service.
+
+If installation is blocked:
+
+1. Use a release build, not a debug build.
+2. Sign release APK with your own keystore.
+3. If you previously installed another build, uninstall it first (signature mismatch blocks updates).
+4. Allow "Install unknown apps" for the app that opens APK (browser/file manager).
+5. Temporarily disable Play Protect scan during install, then enable it back.
+6. Enable OEM "Auto-start" for the app and set battery mode to "Unrestricted" for stable restart after reboot.
+
+You can verify APK signature with:
+
+```bash
+apksigner verify --verbose app-release.apk
+```
+
+Release signing env vars supported by this project:
+
+- `KEYSTORE_PATH`
+- `KEYSTORE_PASSWORD`
+- `KEY_ALIAS`
+- `KEY_PASSWORD`
