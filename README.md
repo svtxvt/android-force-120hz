@@ -24,6 +24,10 @@ adb shell settings put secure min_refresh_rate 120.0
 
 Get the latest APK from [Releases](../../releases).
 
+## Need a fixed 60 Hz or 120 Hz?
+
+If LTPO refresh-rate jumps bother your eyes and you need the rate **locked**, including at 60 Hz: a Pro version with a rate lock and per-app rules is being considered. It is not built yet. **[See what is planned and say if you want it](PRO.md).**
+
 ## Quick Start
 
 1. Install APK (allow unknown sources if prompted).
