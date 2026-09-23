@@ -20,6 +20,12 @@ adb shell settings put system peak_refresh_rate 120
 adb shell settings put secure min_refresh_rate 120.0
 ```
 
+## Check What Your Screen Is Actually Doing
+
+Open **[Refresh Rate Check](https://fluid-rate-check.base44.app)** in your phone's browser. It measures the rate your screen really renders at, shows whether it stays **locked** or keeps jumping (adaptive/LTPO), and has a moving bar to judge smoothness by eye. Use it before and after the ADB commands or the app to see whether the change took effect. No sign-in, no tracking.
+
+Browsers can be capped by battery saver or power modes, so treat it as a quick check, not a lab measurement.
+
 ## Download
 
 Get the latest APK from [Releases](../../releases).
